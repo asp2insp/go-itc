@@ -1,6 +1,9 @@
 package ITC
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // An Event is a recursively defined binary interval tree
 // with
@@ -37,25 +40,39 @@ func (id *Id) String() string {
 	}
 }
 
-// // Reverse the String conversion
-// func stringToId(s string) *Id {
-// 	return sReaderToId(s.Reader())
-// }
+// Reverse the String conversion
+func stringToId(s string) *Id {
+	return sReaderToId(strings.NewReader(s))
+}
 
-// // Recursive helper function that consumes a reader
-// func sReaderToId(s *strings.Reader) (id *Id) {
-// 	ch, _, err := s.ReadRune()
-// 	for {
-// 		switch {
-// 		case err != nil:
-// 			return nil
-// 		case ch == ',':
-// 			break
-// 		case ch == ')' || ' ':
-//       continue
-//     case ch == '('
-//     default:
-// 		}
-// 	}
-// 	return
-// }
+// Recursive helper function that consumes a reader
+func sReaderToId(s *strings.Reader) (id *Id) {
+	_ = "breakpoint"
+
+	id = &Id{n: -1}
+	first := true
+	for {
+		ch, _, err := s.ReadRune()
+		switch {
+		case err != nil:
+			return nil
+		case ch == ',':
+			first = false
+		case ch == ')':
+			break
+		case ch == '(' || ch == ',':
+			nId := sReaderToId(s)
+			if first {
+				id.i1 = nId
+			} else {
+				id.i2 = nId
+			}
+		case ch == '1' || ch == '0':
+			id.n = int(ch) - '0'
+			break
+		default:
+			continue
+		}
+	}
+	return
+}

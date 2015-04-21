@@ -43,6 +43,7 @@ func split(id *Id) (i1, i2 *Id) {
 			}
 	}
 	// If we get to here, id is the root of a subtree
+	// We first check to see if it's a stick
 	switch {
 	// split((0, i)) => (0, a1), (0, a2)
 	// where split(i) = a1, a2
