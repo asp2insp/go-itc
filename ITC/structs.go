@@ -24,17 +24,3 @@ type Stamp struct {
 }
 
 // ================= FUNCTIONS ===============
-
-// Create a new leaf id
-func newId(val int) *Id {
-	return &Id{
-		n: n,
-	}
-}
-
-// Create a new leaf event
-func newEvent(val int) *Event {
-	return &Event{
-		n: val,
-	}
-}

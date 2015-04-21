@@ -23,10 +23,65 @@ func (s *Stamp) Fork() (s1, s2 *Stamp) {
 // =============== INTERNAL ==============
 
 func split(id *Id) (i1, i2 *Id) {
+	// First, take care of the cases where id is a leaf
 	switch {
-	case id.n == 0: // split(0) => (0, 0)
-		return &Id{n: 0}, &Id{n: 0}
-	case id.n == 1: // split(1) => ((1,0), (0,1))
-		return &Id{}
+	// split(0) => 0, 0
+	case id.n == 0:
+		return &Id{n: 0},
+			&Id{n: 0}
+	// split(1) => (1,0), (0,1)
+	case id.n == 1:
+		return &Id{
+				n:  -1,
+				i1: &Id{n: 1},
+				i2: &Id{n: 0},
+			},
+			&Id{
+				n:  -1,
+				i1: &Id{n: 0},
+				i2: &Id{n: 1},
+			}
 	}
+	// If we get to here, id is the root of a subtree
+	switch {
+	// split((0, i)) => (0, a1), (0, a2)
+	// where split(i) = a1, a2
+	case id.i1.n == 0 && id.i2.n != 0:
+		a1, a2 := split(id.i2.n)
+		return &Id{
+				n:  -1,
+				i1: &Id{n: 0},
+				i2: &Id{n: a1},
+			},
+			&Id{
+				n:  -1,
+				i1: &Id{n: 0},
+				i2: &Id{n: a2},
+			}
+	// split((i, 0)) => (a1, 0), (a2, 0)
+	// where split(i) = a1, a2
+	case id.i1.n != 0 && id.i2.n == 0:
+		a1, a2 := split(id.i1.n)
+		return &Id{
+				n:  -1,
+				i1: &Id{n: a1},
+				i2: &Id{n: 0},
+			},
+			&Id{
+				n:  -1,
+				i1: &Id{n: a2},
+				i2: &Id{n: 0},
+			}
+	}
+	// Catch all case: split((i1, i2)) => (i1, 0), (0, i2)
+	return &Id{
+			n:  -1,
+			i1: i1,
+			i2: &Id{n: 0},
+		},
+		&Id{
+			n:  -1,
+			i1: &Id{n: 0},
+			i2: i2,
+		}
 }
