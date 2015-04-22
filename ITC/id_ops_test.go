@@ -26,7 +26,7 @@ func TestSplitOne(t *testing.T) {
 
 // ##__ => #___, _#__
 func TestSplitLeftHalf(t *testing.T) {
-	id := &Id{n: -1, i1: &Id{n: 1}, i2: &Id{n: 0}}
+	id := &Id{n: -1, il: &Id{n: 1}, ir: &Id{n: 0}}
 	i1, i2 := split(id)
 	testutils.CheckString("((1, 0), 0)", i1.String(), t)
 	testutils.CheckString("((0, 1), 0)", i2.String(), t)
@@ -34,7 +34,7 @@ func TestSplitLeftHalf(t *testing.T) {
 
 // __## => __#_, ___#
 func TestSplitRightHalf(t *testing.T) {
-	id := &Id{n: -1, i1: &Id{n: 0}, i2: &Id{n: 1}}
+	id := &Id{n: -1, il: &Id{n: 0}, ir: &Id{n: 1}}
 	i1, i2 := split(id)
 	testutils.CheckString("(0, (1, 0))", i1.String(), t)
 	testutils.CheckString("(0, (0, 1))", i2.String(), t)
@@ -42,7 +42,7 @@ func TestSplitRightHalf(t *testing.T) {
 
 // #### => ##__, __##
 func TestSplitOneEquiv(t *testing.T) {
-	id := &Id{n: -1, i1: &Id{n: 1}, i2: &Id{n: 1}}
+	id := &Id{n: -1, il: &Id{n: 1}, ir: &Id{n: 1}}
 	i1, i2 := split(id)
 	testutils.CheckString("(1, 0)", i1.String(), t)
 	testutils.CheckString("(0, 1)", i2.String(), t)
@@ -88,7 +88,35 @@ func TestNormDeepIsNoOp(t *testing.T) {
 
 // ================= SUM =======================
 
-// _# => #
-func TestSumRightHalf(t *testing.T) {
+// sum(1, 0) => 1
+// sum(0, 1) => 1
+func TestSumAtoms(t *testing.T) {
+	id1 := stringToId("0")
+	id2 := stringToId("1")
+	testutils.CheckString("1", sum(id1, id2).String(), t)
+	testutils.CheckString("1", sum(id2, id1).String(), t)
+}
 
+// sum((i, j), 0) => (i, j)
+func TestSumHalves(t *testing.T) {
+	id1 := stringToId("(1, 0)")
+	id2 := stringToId("0")
+	testutils.CheckString("(1, 0)", sum(id1, id2).String(), t)
+	testutils.CheckString("(1, 0)", sum(id2, id1).String(), t)
+}
+
+// sum((l1, r1), (l2, r2)) => norm(sum(l1, l2), sum(r1, r2))
+// ##__ + __## => ####
+func TestSumRecursiveOneLevel(t *testing.T) {
+	id1 := stringToId("(1, 0)")
+	id2 := stringToId("(0, 1)")
+	testutils.CheckString("1", sum(id1, id2).String(), t)
+}
+
+// sum((l1, r1), (l2, r2)) => norm(sum(l1, l2), sum(r1, r2))
+// ##______ + ___#____ => ##_#____
+func TestSumRecursiveStick(t *testing.T) {
+	id1 := stringToId("((1, 0), 0)")
+	id2 := stringToId("((0, (0, 1)), 0)")
+	testutils.CheckString("((1, (0, 1)), 0)", sum(id1, id2).String(), t)
 }

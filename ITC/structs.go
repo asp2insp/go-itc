@@ -9,14 +9,14 @@ import (
 // with
 type Event struct {
 	n      int    // Value of this node
-	e1, e2 *Event // left child, right child
+	el, er *Event // left child, right child
 }
 
 // An Id is a recursively defined binary interval tree
 // which can be divded or merged with other Ids.
 type Id struct {
 	n      int // Value of this node
-	i1, i2 *Id // left child, right child
+	il, ir *Id // left child, right child
 }
 
 // A stamp is a causal event tracker. It is composed
@@ -35,11 +35,11 @@ func (id *Id) String() string {
 	switch {
 	case id.n == -1:
 		l, r := "nil", "nil"
-		if id.i1 != nil {
-			l = id.i1.String()
+		if id.il != nil {
+			l = id.il.String()
 		}
-		if id.i2 != nil {
-			r = id.i2.String()
+		if id.ir != nil {
+			r = id.ir.String()
 		}
 		return fmt.Sprintf("(%s, %s)", l, r)
 	default:
@@ -66,9 +66,9 @@ func sReaderToId(s *strings.Reader) (id *Id) {
 			// comma begins a new right tree
 			nId := sReaderToId(s)
 			if ch == '(' {
-				id.i1 = nId
+				id.il = nId
 			} else {
-				id.i2 = nId
+				id.ir = nId
 			}
 		// Atoms are always nodes of their own
 		case ch == '1' || ch == '0':
