@@ -55,21 +55,22 @@ func stringToId(s string) *Id {
 // Recursive helper function that consumes a reader
 func sReaderToId(s *strings.Reader) (id *Id) {
 	id = &Id{n: -1}
-Loop:
-	for {
+	for { // Iterate
 		ch, _, err := s.ReadRune()
 		switch {
-		case err != nil:
-			break Loop
-		case ch == ')':
+		// right paren or end of string ends the id
+		case err != nil, ch == ')':
 			return
 		case ch == '(' || ch == ',':
+			// left paren begins a new left tree,
+			// comma begins a new right tree
 			nId := sReaderToId(s)
 			if ch == '(' {
 				id.i1 = nId
 			} else {
 				id.i2 = nId
 			}
+		// Atoms are always nodes of their own
 		case ch == '1' || ch == '0':
 			return &Id{n: int(ch) - '0'}
 		default:
