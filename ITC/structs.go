@@ -34,7 +34,14 @@ type Stamp struct {
 func (id *Id) String() string {
 	switch {
 	case id.n == -1:
-		return fmt.Sprintf("(%s, %s)", id.i1.String(), id.i2.String())
+		l, r := "nil", "nil"
+		if id.i1 != nil {
+			l = id.i1.String()
+		}
+		if id.i2 != nil {
+			r = id.i2.String()
+		}
+		return fmt.Sprintf("(%s, %s)", l, r)
 	default:
 		return fmt.Sprintf("%d", id.n)
 	}
@@ -47,31 +54,25 @@ func stringToId(s string) *Id {
 
 // Recursive helper function that consumes a reader
 func sReaderToId(s *strings.Reader) (id *Id) {
-	_ = "breakpoint"
-
 	id = &Id{n: -1}
-	first := true
+Loop:
 	for {
 		ch, _, err := s.ReadRune()
 		switch {
 		case err != nil:
-			return nil
-		case ch == ',':
-			first = false
+			break Loop
 		case ch == ')':
-			break
+			return
 		case ch == '(' || ch == ',':
 			nId := sReaderToId(s)
-			if first {
+			if ch == '(' {
 				id.i1 = nId
 			} else {
 				id.i2 = nId
 			}
 		case ch == '1' || ch == '0':
-			id.n = int(ch) - '0'
-			break
+			return &Id{n: int(ch) - '0'}
 		default:
-			continue
 		}
 	}
 	return
