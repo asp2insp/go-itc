@@ -22,6 +22,9 @@ func (s *Stamp) Fork() (s1, s2 *Stamp) {
 
 // =============== INTERNAL ==============
 
+// Split the given id into two parts which, when
+// added together, form the given id, and do not
+// overlap
 func split(id *Id) (i1, i2 *Id) {
 	// First, take care of the cases where id is a leaf
 	switch {
@@ -85,4 +88,21 @@ func split(id *Id) (i1, i2 *Id) {
 			i1: &Id{n: 0},
 			i2: id.i2,
 		}
+}
+
+// Normalize a single Id. Used to clean up
+// nodes in the id tree that can be joined
+// to reduce the size of the id tree. Usually
+// used as part of a bigger operation, like sum.
+func norm(id *Id) *Id {
+	switch {
+	case id.n != -1: // norm(i) = i
+		return id
+	case id.i1.n == 0 && id.i2.n == 0: // norm((0,0)) => 0
+		return &Id{n: 0}
+	case id.i1.n == 1 && id.i2.n == 1: // norm((1,1)) => 0
+		return &Id{n: 1}
+	default: // norm(i) = i
+		return id
+	}
 }
