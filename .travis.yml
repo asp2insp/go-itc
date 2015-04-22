@@ -4,7 +4,6 @@ install:
   - go get github.com/asp2insp/go-misc/testutils
 
 go:
-  - 1.4
   - tip
 
 script:
