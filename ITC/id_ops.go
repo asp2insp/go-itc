@@ -72,21 +72,21 @@ func split(id *Id) (i1, i2 *Id) {
 // nodes in the id tree that can be joined
 // to reduce the size of the id tree. Usually
 // used as part of a bigger operation, like sum.
-func norm(id *Id) *Id {
+func normId(id *Id) *Id {
 	switch {
-	case id.n != -1: // norm(i) = i
+	case id.n != -1: // normId(i) = i
 		return id
-	case id.il.n == 0 && id.ir.n == 0: // norm((0,0)) => 0
+	case id.il.n == 0 && id.ir.n == 0: // normId((0,0)) => 0
 		return &Id{n: 0}
-	case id.il.n == 1 && id.ir.n == 1: // norm((1,1)) => 0
+	case id.il.n == 1 && id.ir.n == 1: // normId((1,1)) => 0
 		return &Id{n: 1}
-	default: // norm(i) = i
+	default: // normId(i) = i
 		return id
 	}
 }
 
 // Sum recursively combines two Id trees and produces
-// a normalized result
+// a normIdalized result
 func sum(i1, i2 *Id) *Id {
 	switch {
 	case i1.n == 0:
@@ -94,6 +94,6 @@ func sum(i1, i2 *Id) *Id {
 	case i2.n == 0:
 		return i1
 	default:
-		return norm(&Id{n: -1, il: sum(i1.il, i2.il), ir: sum(i1.ir, i2.ir)})
+		return normId(&Id{n: -1, il: sum(i1.il, i2.il), ir: sum(i1.ir, i2.ir)})
 	}
 }

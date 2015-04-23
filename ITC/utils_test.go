@@ -54,6 +54,6 @@ func TestStringToEventHalves(t *testing.T) {
 }
 
 func TestStringToEventTwoLevels(t *testing.T) {
-	var e *Event = stringToEvent("(2,(3,2,0),(2,1,0))")
-	testutils.CheckString("(2, (3, 2, 0), (2, 1, 0))", e.String(), t)
+	var e *Event = stringToEvent("(2,(3,2,0),(1, 2, (0, (1, 0, 2), 0)))")
+	testutils.CheckString("(2, (3, 2, 0), (1, 2, (0, (1, 0, 2), 0)))", e.String(), t)
 }
