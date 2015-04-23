@@ -2,7 +2,9 @@ package ITC
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
+	"text/scanner"
 )
 
 // An Event is a recursively defined binary interval tree
@@ -13,9 +15,16 @@ type Event struct {
 }
 
 // An Id is a recursively defined binary interval tree
-// which can be divded or merged with other Ids.
+// which can be divded or merged with other Ids. It is defined
+// by recursively dividing an interval into sub intervals
+// where the id is defined (n = 1) or not defined (n = 0)
+// Ids can be represented by a nested tree of intervals:
+// ((1, 0), (0, 1)) represents a subdivision into 4 parts,
+// the outer two parts have value 1 and the middle two have
+// value 0. We would represent this graphically as follows:
+// #__# though an equally valid representation is ##____##
 type Id struct {
-	n      int // Value of this node
+	n      int // Value of this node: 1 or 0 for a leaf, -1 for internal node
 	il, ir *Id // left child, right child
 }
 
@@ -75,6 +84,53 @@ func sReaderToId(s *strings.Reader) (id *Id) {
 			return &Id{n: int(ch) - '0'}
 		default:
 		}
+	}
+	return
+}
+
+// Convert the event into a compact string for printing
+func (e *Event) String() string {
+	switch {
+	case e.el == nil && e.er == nil: // Atom
+		return fmt.Sprintf("%d", e.n)
+	default: // standard case, both subtrees should be defined
+		l, r := "nil", "nil"
+		if e.el != nil {
+			l = e.el.String()
+		}
+		if e.er != nil {
+			r = e.er.String()
+		}
+		return fmt.Sprintf("(%d, %s, %s)", e.n, l, r)
+	}
+}
+
+// Reverse the String conversion
+func stringToEvent(s string) *Event {
+	scan := new(scanner.Scanner)
+	scan.Init(strings.NewReader(s))
+	scan.Mode = scanner.ScanInts
+	return sReaderToEvent(scan)
+}
+
+// Recursive helper function that consumes a reader
+func sReaderToEvent(s *scanner.Scanner) (e *Event) {
+	e = &Event{n: 0}
+	// An event node is either a leaf: "123" or a 3-tuple: "(root, left, right)"
+	for s.Scan() != scanner.EOF {
+		tok := s.TokenText()
+		if n, err := strconv.Atoi(tok); err == nil {
+			// If the next token is a number, we're done
+			e.n = n
+			break
+		} else if tok == "(" {
+			// If this is a start of a new tree, we'll recurse 3 times
+			e.n = sReaderToEvent(s).n
+			e.el = sReaderToEvent(s)
+			e.er = sReaderToEvent(s)
+			break
+		}
+		// Ignore all other tokens
 	}
 	return
 }
