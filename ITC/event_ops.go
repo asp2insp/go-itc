@@ -7,17 +7,14 @@ func lift(e *Event, m int) *Event {
 
 func sink(e *Event, m int) *Event {
 	e.n -= m
-	if isLeaf(e) && e.n == 0 {
-		return nil
-	} else {
-		return e
-	}
+	return e
 }
 
 func normEvent(e *Event) *Event {
 	switch {
 	case isLeaf(e): // norm(n) => n
 		return e
+	// norm((n, m, m) => n+m
 	case isLeaf(e.el) && isLeaf(e.er) && e.el.n == e.er.n:
 		e = lift(e, e.el.n)
 		e.el = nil
@@ -26,8 +23,8 @@ func normEvent(e *Event) *Event {
 	default:
 		m := min(e.el, e.er)
 		lift(e, m)
-		sink(e.el, m)
-		sink(e.er, m)
+		e.el = sink(e.el, m)
+		e.er = sink(e.er, m)
 		return e
 	}
 }

@@ -6,6 +6,23 @@ import (
 	"github.com/ca-geo/go-misc/testutils"
 )
 
+// ================= LEQ =======================
+
+// leq(n1, n2) === n1 <= n2
+func TestCompareTwoAtoms(t *testing.T) {
+	e1 := stringToEvent("1")
+	e2 := stringToEvent("3")
+	testutils.ExpectFalse(leq(e2, e1), "3 !<= 1", t)
+	testutils.ExpectTrue(leq(e1, e2), "1 <= 3", t)
+}
+
+func TestCompareAtomAndTree(t *testing.T) {
+	e1 := stringToEvent("(2, 9, 8)")
+	e2 := stringToEvent("3")
+	testutils.ExpectFalse(leq(e2, e1), "3 !<= 2", t)
+	testutils.ExpectTrue(leq(e1, e2), "2 <= 3", t)
+}
+
 // ================= NORM =======================
 
 // normEvent(n) => n
@@ -27,6 +44,13 @@ func TestNormEventTreeWithMismatchedLeaf(t *testing.T) {
 	e := stringToEvent("(3,1,2)")
 	normed := normEvent(e)
 	testutils.CheckString("(4, 0, 1)", normed.String(), t)
+}
+
+// (2,(2,1,0),3) => (4,(0,1,0),1)
+func TestNormEventTreePartialSink(t *testing.T) {
+	e := stringToEvent("(2,(2,1,0),3)")
+	normed := normEvent(e)
+	testutils.CheckString("(4, (0, 1, 0), 1)", normed.String(), t)
 }
 
 // ================= LIFT =======================
