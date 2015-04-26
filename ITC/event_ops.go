@@ -40,3 +40,7 @@ func min(e1, e2 *Event) int {
 func isLeaf(e *Event) bool {
 	return e.el == nil && e.er == nil
 }
+
+func leq(e1, e2 *Event) bool {
+	return false
+}
