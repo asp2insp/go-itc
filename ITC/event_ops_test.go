@@ -9,14 +9,14 @@ import (
 // ================= LEQ =======================
 
 // leq(n1, n2) === n1 <= n2
-func TestCompareTwoAtoms(t *testing.T) {
+func _TestCompareTwoAtoms(t *testing.T) {
 	e1 := stringToEvent("1")
 	e2 := stringToEvent("3")
 	testutils.ExpectFalse(leq(e2, e1), "3 !<= 1", t)
 	testutils.ExpectTrue(leq(e1, e2), "1 <= 3", t)
 }
 
-func TestCompareAtomAndTree(t *testing.T) {
+func _TestCompareAtomAndTree(t *testing.T) {
 	e1 := stringToEvent("(2, 9, 8)")
 	e2 := stringToEvent("3")
 	testutils.ExpectFalse(leq(e2, e1), "3 !<= 2", t)
