@@ -9,18 +9,64 @@ import (
 // ================= LEQ =======================
 
 // leq(n1, n2) === n1 <= n2
-func _TestCompareTwoAtoms(t *testing.T) {
+func TestCompareTwoAtoms(t *testing.T) {
 	e1 := stringToEvent("1")
 	e2 := stringToEvent("3")
 	testutils.ExpectFalse(leq(e2, e1), "3 !<= 1", t)
 	testutils.ExpectTrue(leq(e1, e2), "1 <= 3", t)
 }
 
-func _TestCompareAtomAndTree(t *testing.T) {
-	e1 := stringToEvent("(2, 9, 8)")
-	e2 := stringToEvent("3")
-	testutils.ExpectFalse(leq(e2, e1), "3 !<= 2", t)
-	testutils.ExpectTrue(leq(e1, e2), "2 <= 3", t)
+// leq(n1, (n2, l2, r2)) === n1 <= n2
+func TestCompareAtomLessThanTree(t *testing.T) {
+	base := stringToEvent("4")
+	less := stringToEvent("(2, 10, 0)")
+	more := stringToEvent("(8, 0, 1)")
+	testutils.ExpectFalse(leq(more, base), "8 !<= 4", t)
+	testutils.ExpectFalse(leq(less, base), "2 <= 4", t)
+}
+
+// leq((n1, l1 r1), n2) === n1 <= n2
+//                           and leq(lift(l1, n1), n2)
+//                           and leq(lift(r1, n1), n2)
+func TestCompareTreeLessThanAtom(t *testing.T) {
+	base := stringToEvent("(3, 9, 0)")
+	less := stringToEvent("3")
+	more := stringToEvent("20")
+	testutils.ExpectFalse(leq(more, base), "20 !<= 2+1 or 2+9", t)
+	testutils.ExpectTrue(leq(less, base), "3 <= 3+9 and 3+0", t)
+}
+
+// leq((n1, l1, r1), (n2, l2, r2)) === n1 <= n2
+//                                     and leq(lift(l1, n1), lift(l2, n2))
+//                                     and leq(lift(r1, n1), lift(r2, n2))
+func TestCompareTwoTreesByRoot(t *testing.T) {
+	base := stringToEvent("(2, 9, 8)")
+	less := stringToEvent("(1, 0, 5)")
+	more := stringToEvent("(10, 0, 9)")
+	testutils.ExpectFalse(leq(more, base), "10 !<= 2", t)
+	testutils.ExpectTrue(leq(less, base), "1 <= 2", t)
+}
+
+// leq((n1, l1, r1), (n2, l2, r2)) === n1 <= n2
+//                                     and leq(lift(l1, n1), lift(l2, n2))
+//                                     and leq(lift(r1, n1), lift(r2, n2))
+func TestCompareTwoTreesByLeaves(t *testing.T) {
+	base := stringToEvent("(2, 5, 6)")
+	less := stringToEvent("(2, 5, 5)")
+	more := stringToEvent("(2, 6, 6)")
+	testutils.ExpectFalse(leq(more, base), "6 !<= 5", t)
+	testutils.ExpectTrue(leq(less, base), "5 <= 6", t)
+}
+
+// leq((n1, l1, r1), (n2, l2, r2)) === n1 <= n2
+//                                     and leq(lift(l1, n1), lift(l2, n2))
+//                                     and leq(lift(r1, n1), lift(r2, n2))
+func TestCompareTwoTreesRecursive(t *testing.T) {
+	base := stringToEvent("(2, 0, (1, 2, 0))")
+	less := stringToEvent("(2, 0, (1, 1, 0))")
+	more := stringToEvent("(2, 0, (1, 5, 0))")
+	testutils.ExpectFalse(leq(more, base), "5 !<= 2", t)
+	testutils.ExpectTrue(leq(less, base), "1 <= 2", t)
 }
 
 // ================= NORM =======================
@@ -59,6 +105,7 @@ func TestNormEventTreePartialSink(t *testing.T) {
 func TestLiftAtom(t *testing.T) {
 	e := stringToEvent("1")
 	eLifted := lift(e, 3)
+	testutils.ExpectTrue(e != eLifted, "lift should return a new event", t)
 	testutils.CheckString("4", eLifted.String(), t)
 }
 
@@ -66,6 +113,7 @@ func TestLiftAtom(t *testing.T) {
 func TestLiftRoot(t *testing.T) {
 	e := stringToEvent("(1, 4, 7)")
 	eLifted := lift(e, 3)
+	testutils.ExpectTrue(e != eLifted, "lift should return a new event", t)
 	testutils.CheckString("(4, 4, 7)", eLifted.String(), t)
 }
 
@@ -75,6 +123,7 @@ func TestLiftRoot(t *testing.T) {
 func TestSinkAtom(t *testing.T) {
 	e := stringToEvent("5")
 	eSunk := sink(e, 3)
+	testutils.ExpectTrue(e != eSunk, "sink should return a new event", t)
 	testutils.CheckString("2", eSunk.String(), t)
 }
 
@@ -82,5 +131,6 @@ func TestSinkAtom(t *testing.T) {
 func TestSinkRoot(t *testing.T) {
 	e := stringToEvent("(8, 4, 7)")
 	eSunk := sink(e, 3)
+	testutils.ExpectTrue(e != eSunk, "sink should return a new event", t)
 	testutils.CheckString("(5, 4, 7)", eSunk.String(), t)
 }
