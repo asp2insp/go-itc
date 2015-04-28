@@ -6,6 +6,34 @@ import (
 	"github.com/asp2insp/go-misc/testutils"
 )
 
+// ================= JOIN =======================
+
+// join(n1, n2) === max(n1, n2)
+func TestJoinTwoAtoms(t *testing.T) {
+	n1 := stringToEvent("1")
+	n2 := stringToEvent("3")
+	testutils.ExpectTrue(n2 == join(n1, n2), "Join of atoms should take max", t)
+	testutils.ExpectTrue(n2 == join(n2, n1), "Join order shouldn't matter", t)
+}
+
+// join((n1, l1, r1), (n2, l2, r2)) = norm((n1,
+//                                         join(l1, lift(l2, n2- n1)),
+//                                         join(r1, lift(r2, n2- n1))))
+func TestJoinShallow(t *testing.T) {
+	e1 := stringToEvent("(2, 0, 5)")
+	e2 := stringToEvent("(3, 7, 0)")
+	testutils.CheckString("(7, 3, 0)", join(e1, e2).String(), t)
+	testutils.CheckString("(7, 3, 0)", join(e2, e1).String(), t)
+}
+
+// join(n1, (n2, l2, r2)) === join((n1, 0, 0), (n2, l2, r2))
+func TestJoinHalves(t *testing.T) {
+	e1 := stringToEvent("5")
+	e2 := stringToEvent("(3, 7, 0)")
+	testutils.CheckString("(5, 5, 0)", join(e1, e2).String(), t)
+	testutils.CheckString("(5, 5, 0)", join(e2, e1).String(), t)
+}
+
 // ================= LEQ =======================
 
 // leq(n1, n2) === n1 <= n2
