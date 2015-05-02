@@ -18,8 +18,8 @@ func TestFillWithOutId(t *testing.T) {
 // fill(1, e) = max(e)
 func TestFillWithFullId(t *testing.T) {
 	i := stringToId("1")
-	e := stringToEvent("(3, 0, 1)")
-	testutils.CheckString("(3, 0, 1)", fill(i, e).String(), t)
+	e := stringToEvent("(3, 0, (6, 0, 2))")
+	testutils.CheckString("11", fill(i, e).String(), t)
 }
 
 // fill(i, n) = n
@@ -186,4 +186,20 @@ func TestSinkRoot(t *testing.T) {
 	eSunk := sink(e, 3)
 	testutils.ExpectTrue(e != eSunk, "sink should return a new event", t)
 	testutils.CheckString("(5, 4, 7)", eSunk.String(), t)
+}
+
+// ================= MAX =======================
+
+// max(n) = n
+func TestMaxAtom(t *testing.T) {
+	e := stringToEvent("5")
+	m := max(e)
+	testutils.CheckInt(5, m, t)
+}
+
+// max((n, l, r)) = n + max(max(l), max(r))
+func TestMaxRecursive(t *testing.T) {
+	e := stringToEvent("(5, 0, (1, 3, 0))")
+	m := max(e)
+	testutils.CheckInt(9, m, t)
 }

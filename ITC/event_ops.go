@@ -2,7 +2,7 @@ package ITC
 
 // fill uses the given id as a basis for modifying
 // the event tree. It attempts to simplify the event
-// tree by filling in holes and collapsing the tree down.
+// tree by filling in holes and collapsing the tree down
 func fill(i *Id, e *Event) *Event {
 	return new(Event)
 }
@@ -62,12 +62,18 @@ func min(e1, e2 *Event) int {
 }
 
 // max is a utility function which compares the value of two events directly.
-// Returns the event directly.
-func max(e1, e2 *Event) *Event {
-	if e1.n > e2.n {
-		return e1
+// Returns the event directly when given 2 items.
+// When given one item, it finds the maximum value that can be equal to the
+// tree without dominating it. TODO: refactor that into a seperate function
+func max(events ...*Event) *Event {
+	if len(events) == 2 {
+		if events[0].n > events[1].n {
+			return events[0]
+		}
+		return events[1]
 	}
-	return e2
+	// One item case collapses the event down recursively
+	return &Event{n: events[0].n + max(max(events[0].el), max(events[0].el)).n}
 }
 
 // isLeaf returns true if the given event has no children
