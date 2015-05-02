@@ -6,6 +6,31 @@ import (
 	"github.com/asp2insp/go-misc/testutils"
 )
 
+// ================= FILL =======================
+
+// fill(0, e) = e
+func TestFillWithOutId(t *testing.T) {
+	i := stringToId("0")
+	e := stringToEvent("(3, 0, 1)")
+	testutils.CheckString("(3, 0, 1)", fill(i, e).String(), t)
+}
+
+// fill(1, e) = max(e)
+func TestFillWithFullId(t *testing.T) {
+	i := stringToId("1")
+	e := stringToEvent("(3, 0, 1)")
+	testutils.CheckString("(3, 0, 1)", fill(i, e).String(), t)
+}
+
+// fill(i, n) = n
+func TestFillWithAtomicEvent(t *testing.T) {
+	i := stringToId("0")
+	i2 := stringToId("1")
+	e := stringToEvent("7")
+	testutils.CheckString("7", fill(i, e).String(), t)
+	testutils.CheckString("7", fill(i2, e).String(), t)
+}
+
 // ================= JOIN =======================
 
 // join(n1, n2) === max(n1, n2)

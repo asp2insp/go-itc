@@ -1,5 +1,12 @@
 package ITC
 
+// fill uses the given id as a basis for modifying
+// the event tree. It attempts to simplify the event
+// tree by filling in holes and collapsing the tree down.
+func fill(i *Id, e *Event) *Event {
+	return new(Event)
+}
+
 // lift returns a new event with the
 // same children as the given event,
 // but with the root node value increased
