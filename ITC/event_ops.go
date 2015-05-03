@@ -4,6 +4,14 @@ package ITC
 // the event tree. It attempts to simplify the event
 // tree by filling in holes and collapsing the tree down
 func fill(i *Id, e *Event) *Event {
+	switch {
+	case i.n == 0: // fill(0, e) = e
+		return e
+	case i.n == 1: // fill(1, e) = maxTree(e)
+		return maxTree(e)
+	case isLeaf(e): // fill(i, n) = n
+		return e
+	}
 	return new(Event)
 }
 
@@ -44,7 +52,7 @@ func normEvent(e *Event) *Event {
 		e.er = nil
 		return e
 	default:
-		m := min(e.el, e.er)
+		m := min(e.el, e.er).n
 		e = lift(e, m)
 		e.el = sink(e.el, m)
 		e.er = sink(e.er, m)
@@ -53,27 +61,41 @@ func normEvent(e *Event) *Event {
 }
 
 // min is a utility function which compares the value of two events directly.
-// Returns the node value of the smaller event
-func min(e1, e2 *Event) int {
+// Returns the smaller event directly
+func min(e1, e2 *Event) *Event {
 	if e1.n < e2.n {
-		return e1.n
+		return e1
 	}
-	return e2.n
+	return e2
 }
 
 // max is a utility function which compares the value of two events directly.
-// Returns the event directly when given 2 items.
-// When given one item, it finds the maximum value that can be equal to the
-// tree without dominating it. TODO: refactor that into a seperate function
-func max(events ...*Event) *Event {
-	if len(events) == 2 {
-		if events[0].n > events[1].n {
-			return events[0]
-		}
-		return events[1]
+// Returns the event directly.
+func max(e1, e2 *Event) *Event {
+	if e1.n > e2.n {
+		return e1
 	}
-	// One item case collapses the event down recursively
-	return &Event{n: events[0].n + max(max(events[0].el), max(events[0].el)).n}
+	return e2
+}
+
+// maxTree returns a new tree which represents filling in the given event tree
+// as completely as possible. If the tree is already in a full state, i.e.
+// is an atom, then it is returned without modification.
+func maxTree(e *Event) *Event {
+	if isLeaf(e) {
+		return e
+	}
+	return &Event{n: e.n + max(maxTree(e.el), maxTree(e.er)).n}
+}
+
+// minTree returns a new tree which represents pruning the given event tree
+// down as much as possible. If the tree is already in a min state, i.e.
+// is an atom, then it is returned without modification.
+func minTree(e *Event) *Event {
+	if isLeaf(e) {
+		return e
+	}
+	return &Event{n: e.n + min(minTree(e.el), minTree(e.er)).n}
 }
 
 // isLeaf returns true if the given event has no children
@@ -111,6 +133,8 @@ func leq(e1, e2 *Event) bool {
 	}
 }
 
+// fillNils expands a leaf to have two empty
+// children
 func fillNils(e *Event) *Event {
 	return &Event{
 		n:  e.n,

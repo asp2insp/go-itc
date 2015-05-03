@@ -188,18 +188,38 @@ func TestSinkRoot(t *testing.T) {
 	testutils.CheckString("(5, 4, 7)", eSunk.String(), t)
 }
 
-// ================= MAX =======================
+// ================= MAX (tree) =======================
 
 // max(n) = n
 func TestMaxAtom(t *testing.T) {
 	e := stringToEvent("5")
-	m := max(e)
-	testutils.CheckInt(5, m, t)
+	m := maxTree(e)
+	testutils.ExpectTrue(isLeaf(m), "The result of max should be an atom", t)
+	testutils.CheckInt(5, m.n, t)
 }
 
 // max((n, l, r)) = n + max(max(l), max(r))
 func TestMaxRecursive(t *testing.T) {
 	e := stringToEvent("(5, 0, (1, 3, 0))")
-	m := max(e)
-	testutils.CheckInt(9, m, t)
+	m := maxTree(e)
+	testutils.ExpectTrue(isLeaf(m), "The result of max should be an atom", t)
+	testutils.CheckInt(9, m.n, t)
+}
+
+// ================= MIN (tree) =======================
+
+// min(n) = n
+func TestMinAtom(t *testing.T) {
+	e := stringToEvent("5")
+	m := minTree(e)
+	testutils.ExpectTrue(isLeaf(m), "The result of min should be an atom", t)
+	testutils.CheckInt(5, m.n, t)
+}
+
+// min((n, l, r)) = n + min(min(l), min(r))
+func TestMinRecursive(t *testing.T) {
+	e := stringToEvent("(5, 0, (1, 3, 0))")
+	m := minTree(e)
+	testutils.ExpectTrue(isLeaf(m), "The result of min should be an atom", t)
+	testutils.CheckInt(5, m.n, t)
 }
